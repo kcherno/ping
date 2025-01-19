@@ -30,6 +30,8 @@ namespace ping::icmp
 
 	void calculate_checksum(std::size_t size) noexcept
 	{
+	    checksum_ = 0;
+
 	    auto sum = uint32_t {};
 
 	    auto data = reinterpret_cast<const uint16_t*>(this);
