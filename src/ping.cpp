@@ -10,6 +10,13 @@
 #include <cstdlib>
 #include <ctime>
 
+extern "C"
+{
+
+#include <unistd.h>
+
+}
+
 #include <boost/system/system_error.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/asio.hpp>
@@ -24,44 +31,39 @@ namespace
     };
 }
 
-template<typename ExecutionContext>
-void do_ping(ExecutionContext& executor, std::string_view address)
+void do_ping(std::string_view address)
 {
     auto error = boost::system::error_code {};
 
-    const auto destination_address =
-	boost::asio::ip::make_address(address, error);
+    const auto destination_endpoint = boost::asio::ip::icmp::endpoint {
+	boost::asio::ip::make_address(address, error),
+	0
+    };
 
     if (error)
     {
 	throw boost::system::system_error {error, "make_address"};
     }
 
+    auto io_context = boost::asio::io_context {};
+
     auto socket = boost::asio::ip::icmp::socket {
-	executor,
-	destination_address.is_v4() ?
+	io_context,
+	destination_endpoint.address().is_v4() ?
 	boost::asio::ip::icmp::v4() :
 	boost::asio::ip::icmp::v6()
     };
 
-    auto endpoint = boost::asio::ip::icmp::endpoint {
-	destination_address,
-	0
-    };
+    std::cout << "PING "
+	      << destination_endpoint.address()
+	      << " 8 bytes of data"
+	      << std::endl;
 
     std::array<uint8_t, 32> buffer;
 
-    const auto sleep_duration = ::timespec {
-	.tv_sec  = 1,
-	.tv_nsec = 0
-    };
+    auto sequence_number = uint16_t {};
 
-    uint16_t sequence_number = 0;
-
-    constexpr auto max_sequence_number =
-	std::numeric_limits<uint16_t>::max();
-
-    for (; sequence_number < max_sequence_number; ++sequence_number)
+    while (sequence_number < std::numeric_limits<uint16_t>::max())
     {
 	auto& mutable_icmp_echo =
 	    *reinterpret_cast<ping::icmp::icmp_echo_header*>(buffer.data());
@@ -75,14 +77,49 @@ void do_ping(ExecutionContext& executor, std::string_view address)
 	const auto const_buffer =
 	    boost::asio::buffer(buffer.data(), mutable_icmp_echo.header_length());
 
-	socket.send_to(const_buffer, endpoint);
+	socket.send_to(const_buffer, destination_endpoint);
 
 	++statistics.sent_packets;
 
+	auto sender_endpoint = boost::asio::ip::icmp::endpoint {};
+
+	::alarm(1);
+
 	const auto received_bytes =
-	    socket.receive_from(boost::asio::buffer(buffer), endpoint);
+	    socket.receive_from(boost::asio::buffer(buffer),
+				sender_endpoint,
+				0,
+				error);
+
+	if (error)
+	{
+	    const auto interrupted_error =
+		boost::system::errc::make_error_code(boost::system::errc::interrupted);
+
+	    if (error.value() == interrupted_error.value())
+	    {
+		++sequence_number;
+
+		continue;
+	    }
+
+	    throw boost::system::system_error {error, "receive_from"};
+	}
 
 	++statistics.received_packets;
+
+	if (sender_endpoint != destination_endpoint)
+	{
+	    /*
+	      boost::asio::ip::icmp::socket uses a raw socket,
+	      so sometimes it can receive packets from localhost
+	    */
+
+	    --statistics.sent_packets;
+	    --statistics.received_packets;
+
+	    continue;
+	}
 
 	const auto& const_ip_header =
 	    *reinterpret_cast<const ping::ip::ipv4_header*>(buffer.data());
@@ -92,7 +129,7 @@ void do_ping(ExecutionContext& executor, std::string_view address)
 
 	std::cout << received_bytes
 		  << " received bytes from "
-		  << endpoint.address()
+		  << sender_endpoint.address()
 		  << ": "
 		  << "icmp_sequence_number="
 		  << const_icmp_echo.sequence_number()
@@ -100,15 +137,34 @@ void do_ping(ExecutionContext& executor, std::string_view address)
 		  << static_cast<int>(const_ip_header.time_to_live())
 		  << std::endl;
 
+	const auto sleep_duration = ::timespec {
+	    .tv_sec  = 1,
+	    .tv_nsec = 0
+	};
+
 	::nanosleep(&sleep_duration, nullptr);
+
+	++sequence_number;
     }
 }
 
-void terminal_interrupt_handler(int)
+void interrupt_signal_handler(int signal)
 {
-    std::cout << statistics << std::endl;
+    std::cout << "--- ping statistics ---\n"
+	      << statistics
+	      << std::endl;
+
+    if (signal == SIGQUIT)
+    {
+	return;
+    }
 
     std::exit(EXIT_SUCCESS);
+}
+
+void alarm_signal_handler(int)
+{
+    return;
 }
 
 void set_signal_handler(int signal, struct ::sigaction& signal_action)
@@ -144,16 +200,20 @@ int main(int argc, char** argv)
 
 	struct ::sigaction interrupt_signal;
 
-	interrupt_signal.sa_handler = &terminal_interrupt_handler;
+	interrupt_signal.sa_handler = &interrupt_signal_handler;
 
 	auto quit_signal = interrupt_signal;
 
+	struct ::sigaction alarm_signal;
+
+	alarm_signal.sa_handler = &alarm_signal_handler;
+	alarm_signal.sa_flags   = 0;
+
 	set_signal_handler(SIGINT,  interrupt_signal);
 	set_signal_handler(SIGQUIT, quit_signal);
+	set_signal_handler(SIGALRM, alarm_signal);
 
-	auto io_context = boost::asio::io_context {};
-
-	do_ping(io_context, argv[1]);
+	do_ping(argv[1]);
     }
 
     catch (const std::exception& e)
@@ -162,4 +222,6 @@ int main(int argc, char** argv)
 
 	return 1;
     }
+
+    return 0;
 }
