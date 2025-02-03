@@ -183,44 +183,53 @@ int main(int argc, char** argv)
     {
 	if (argc == 1)
 	{
-	    throw std::runtime_error {"Usage: ping -h|--help"};
+	    std::cerr << "Usage: ping -h" << std::endl;
+
+	    return 1;
+	}
+
+	ping::configuration::options options;
+
+	options.parse_command_line(argc, argv);
+
+	if (options.contains("-h"))
+	{
+	    std::cout << options << std::endl;
+	}
+
+	else if (not options.contains("-a"))
+	{
+	    std::cerr << "ping: <address> is requred" << std::endl;
+
+	    return 1;
 	}
 
 	else
 	{
-	    auto option = std::string_view(argv[1]);
+	    struct ::sigaction interrupt_signal;
 
-	    if (option == "-h" || option == "--help")
-	    {
-		std::cout << "Usage: ping <address>" << std::endl;
+	    interrupt_signal.sa_handler = &interrupt_signal_handler;
 
-		return 0;
-	    }
+	    auto quit_signal = interrupt_signal;
+
+	    struct ::sigaction alarm_signal;
+
+	    alarm_signal.sa_handler = &alarm_signal_handler;
+	    alarm_signal.sa_flags   = 0;
+
+	    set_signal_handler(SIGINT,  interrupt_signal);
+	    set_signal_handler(SIGQUIT, quit_signal);
+	    set_signal_handler(SIGALRM, alarm_signal);
+
+	    do_ping(options["-a"].as<std::string>());
 	}
-
-	struct ::sigaction interrupt_signal;
-
-	interrupt_signal.sa_handler = &interrupt_signal_handler;
-
-	auto quit_signal = interrupt_signal;
-
-	struct ::sigaction alarm_signal;
-
-	alarm_signal.sa_handler = &alarm_signal_handler;
-	alarm_signal.sa_flags   = 0;
-
-	set_signal_handler(SIGINT,  interrupt_signal);
-	set_signal_handler(SIGQUIT, quit_signal);
-	set_signal_handler(SIGALRM, alarm_signal);
-
-	do_ping(argv[1]);
     }
 
     catch (const std::exception& e)
     {
 	std::cerr << e.what() << std::endl;
 
-	return 1;
+	return 2;
     }
 
     return 0;
