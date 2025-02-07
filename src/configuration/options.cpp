@@ -3,10 +3,56 @@
 
 #include <cstdint>
 
-#include <boost/program_options/cmdline.hpp>
-#include <boost/program_options/parsers.hpp>
+#include <boost/program_options.hpp>
 
 #include "configuration/options.hpp"
+
+namespace
+{
+    void c_notifier(const int& c)
+    {
+	if (c < 1 || std::numeric_limits<std::uint16_t>::max() < c)
+	{
+	    constexpr auto what =
+		"the valid range for the '-c' option is from 1 to 65535";
+
+	    throw boost::program_options::error {what};
+	}
+    }
+
+    void i_notifier(const int& i)
+    {
+	if (i < 0)
+	{
+	    constexpr auto what =
+		"the argument for '-i' option cannot be negative";
+
+	    throw boost::program_options::error {what};
+	}
+    }
+
+    void t_notifier(const int& t)
+    {
+	if (t < 1 || std::numeric_limits<std::uint8_t>::max() < t)
+	{
+	    constexpr auto what =
+		"the valid range for the '-t' option is from 1 to 255";
+
+	    throw boost::program_options::error {what};
+	}
+    }
+
+    void W_notifier(const int& W)
+    {
+	if (W < 1)
+	{
+	    constexpr auto what =
+		"the argument for '-W' option cannot be negative or zero";
+
+	    throw boost::program_options::error {what};
+	}
+    }
+}
 
 namespace ping::configuration
 {
@@ -19,8 +65,9 @@ namespace ping::configuration
 	     "ip address")
 
 	    (",c",
-	     boost::program_options::value<std::size_t>()
-	     ->default_value(std::numeric_limits<uint16_t>::max(), "")
+	     boost::program_options::value<int>()
+	     ->default_value(std::numeric_limits<std::uint16_t>::max(), "")
+	     ->notifier(c_notifier)
 	     ->value_name("<count>"),
 	     "stop after <count> replies")
 
@@ -28,20 +75,23 @@ namespace ping::configuration
 	     "print help and exit")
 
 	    (",i",
-	     boost::program_options::value<std::size_t>()
-	     ->default_value(0, "")
+	     boost::program_options::value<int>()
+	     ->default_value(1, "")
+	     ->notifier(i_notifier)
 	     ->value_name("<interval>"),
 	     "seconds between sending each packet")
 
 	    (",t",
-	     boost::program_options::value<uint8_t>()
-	     ->default_value(std::numeric_limits<uint8_t>::max(), "")
+	     boost::program_options::value<int>()
+	     ->default_value(std::numeric_limits<std::uint8_t>::max(), "")
+	     ->notifier(t_notifier)
 	     ->value_name("<ttl>"),
 	     "time to live")
 
 	    (",W",
-	     boost::program_options::value<std::size_t>()
-	     ->default_value(0, "")
+	     boost::program_options::value<int>()
+	     ->default_value(1, "")
+	     ->notifier(W_notifier)
 	     ->value_name("<timeout>"),
 	     "time to wait for response");
 
