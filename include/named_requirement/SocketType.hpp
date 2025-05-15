@@ -2,7 +2,7 @@
 
 #include <concepts>
 
-namespace ping::name_requirement
+namespace ping::named_requirement
 {
     template<typename T>
     concept SocketType = requires

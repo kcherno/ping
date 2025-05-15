@@ -2,6 +2,7 @@
 
 #include <source_location>
 #include <system_error>
+#include <optional>
 #include <utility>
 
 extern "C"
@@ -12,13 +13,15 @@ extern "C"
 
 }
 
-#include "name_requirement/SocketPorotocol.hpp"
-#include "name_requirement/SocketDomain.hpp"
-#include "name_requirement/SocketType.hpp"
+#include "named_requirement/SocketProtocol.hpp"
+#include "named_requirement/SocketDomain.hpp"
+#include "named_requirement/SocketType.hpp"
 
 namespace ping::generic
 {
-    template<SocketDomain Domain, SocketType Type, SocketProtocol Protocol>
+    template<named_requirement::SocketDomain   Domain,
+	     named_requirement::SocketType     Type,
+	     named_requirement::SocketProtocol Protocol>
     class basic_socket final
     {
     public:
@@ -56,7 +59,7 @@ namespace ping::generic
 	    {
 		throw std::system_error {
 		    error,
-		    std::source_locatiom::current().function_name()
+		    std::source_location::current().function_name()
 	        };
 	    }
 	}
