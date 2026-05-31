@@ -2,6 +2,8 @@
 
 #include <string_view>
 
+#include <cstdint>
+
 namespace ping
 {
     class application final
@@ -10,7 +12,7 @@ namespace ping
 
         struct configuration final
         {
-
+            std::uint16_t icmp_echo_message_identifier;
         };
 
         struct statistics final
