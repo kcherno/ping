@@ -38,5 +38,9 @@ namespace ping
         {
 
         }
+
+    public:
+
+        configuration configuration_;
     };
 }
