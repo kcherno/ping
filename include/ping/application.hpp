@@ -13,6 +13,11 @@ namespace ping
 
         };
 
+        struct statistics final
+        {
+
+        };
+
         application(int argc, char** argv)
         {
 
