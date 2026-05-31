@@ -8,6 +8,11 @@ namespace ping
     {
     public:
 
+        struct configuration final
+        {
+
+        };
+
         application(int argc, char** argv)
         {
 
