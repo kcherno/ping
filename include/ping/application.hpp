@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <chrono>
 
 #include <cstdint>
 
@@ -12,9 +13,10 @@ namespace ping
 
         struct configuration final
         {
-            std::string_view address;
-            std::string_view icmp_echo_message;
-            std::uint16_t    icmp_echo_message_identifier;
+            std::string_view     address;
+            std::string_view     icmp_echo_message;
+            std::uint16_t        icmp_echo_message_identifier;
+            std::chrono::seconds response_timeout;
         };
 
         struct statistics final
