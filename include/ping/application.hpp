@@ -2,6 +2,7 @@
 
 #include <string_view>
 #include <chrono>
+#include <memory>
 
 #include <cstdint>
 
@@ -46,12 +47,13 @@ namespace ping
 
         void run() const
         {
-
+            executor_->execute();
         }
 
     public:
 
-        configuration configuration_;
-        statistics    statistics_;
+        configuration                               configuration_;
+        statistics                                  statistics_;
+        std::unique_ptr<basic_application_executor> executor_;
     };
 }
