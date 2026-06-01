@@ -11,6 +11,15 @@ namespace ping
     {
     public:
 
+        class basic_application_executor
+        {
+        public:
+
+            virtual ~basic_application_executor() = default;
+
+            virtual void execute() = 0;
+        };
+
         struct configuration final
         {
             std::string_view     address;
