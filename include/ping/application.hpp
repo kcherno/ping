@@ -43,5 +43,6 @@ namespace ping
     public:
 
         configuration configuration_;
+        statistics    statistics_;
     };
 }
