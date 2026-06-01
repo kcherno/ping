@@ -21,7 +21,7 @@ namespace ping
 
         struct statistics final
         {
-
+            std::uint16_t sent_packets;
         };
 
         application(int argc, char** argv)
