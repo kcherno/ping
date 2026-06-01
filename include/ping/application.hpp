@@ -21,6 +21,7 @@ namespace ping
 
         struct statistics final
         {
+            std::uint16_t received_packets;
             std::uint16_t sent_packets;
         };
 
