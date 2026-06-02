@@ -42,12 +42,12 @@ namespace ping::detail
                     configuration.icmp_echo_message
                 },
 
-                response_timeout_ {
-                    configuration.response_timeout
-                },
-
                 statistics_ {
                     statistics
+                },
+
+                timeout_ {
+                    configuration.timeout
                 }
         {}
 
@@ -63,8 +63,8 @@ namespace ping::detail
         net::ipv4::endpoint      destination_;
         net::ipv4::icmp::header  header_;
         std::string_view         message_;
-        std::chrono::seconds     response_timeout_;
         net::ipv4::icmp::socket  socket_;
         application::statistics& statistics_;
+        std::chrono::seconds     timeout_;
     };
 }

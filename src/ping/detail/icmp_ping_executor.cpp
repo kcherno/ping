@@ -38,7 +38,7 @@ void ping::detail::icmp_ping_executor::execute()
 
         const auto begin = std::chrono::steady_clock::now();
 
-        timer.start_countdown(response_timeout_);
+        timer.start_countdown(timeout_);
 
         const auto end = std::chrono::steady_clock::now();
 
