@@ -23,8 +23,8 @@ namespace ping::detail
                     configuration.count
                 },
 
-                destination_endpoint_ {
-                    configuration_.address
+                destination_ {
+                    configuration.destination
                 },
 
                 header_ {
@@ -33,7 +33,7 @@ namespace ping::detail
                     .checksum = 0,
 
                     .echo_message {
-                        .identifier      = configuration_.identifier,
+                        .identifier      = configuration.identifier,
                         .sequence_number = 0
                     }
                 },
@@ -60,7 +60,7 @@ namespace ping::detail
         bool verify_response(const net::ipv4::endpoint&, std::string_view);
 
         std::uint16_t            count_;
-        net::ipv4::endpoint      destination_endpoint_;
+        net::ipv4::endpoint      destination_;
         net::ipv4::icmp::header  header_;
         std::string_view         message_;
         std::chrono::seconds     response_timeout_;

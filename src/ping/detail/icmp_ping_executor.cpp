@@ -28,7 +28,7 @@ void ping::detail::icmp_ping_executor::execute()
     socket_.open();
 
     std::cout << std::format("ping {} with {}({}) bytes of data\n\n",
-        destination_endpoint_.address(),
+        destination_.address(),
         message_.size(),
         message_.size() + net::ipv4::icmp::header::echo_message_header_size);
 
@@ -59,8 +59,7 @@ void ping::detail::icmp_ping_executor::execute()
 void ping::detail::icmp_ping_executor::ping_once()
 {
     socket_.send_to(
-        destination_endpoint_,
-        net::ipv4::icmp::make_icmp_message(header_, message_));
+        destination_, net::ipv4::icmp::make_icmp_message(header_, message_));
 
     ++header_.echo_message.sequence_number;
 
@@ -69,7 +68,7 @@ void ping::detail::icmp_ping_executor::ping_once()
     std::cout << std::format(
         "sent {} bytes to {}: identifier={} sequence_number={}\n",
         message_.size() + net::ipv4::icmp::header::echo_message_header_size,
-        destination_endpoint_.address(),
+        destination_.address(),
         header_.echo_message.identifier,
         header_.echo_message.sequence_number);
 }
@@ -77,7 +76,7 @@ void ping::detail::icmp_ping_executor::ping_once()
 bool ping::detail::icmp_ping_executor::verify_response(
     const net::ipv4::endpoint& source_endpoint, std::string_view data)
 {
-    if (destination_endpoint_.address() == source_endpoint.address())
+    if (destination_.address() == source_endpoint.address())
     {
         const auto& [header, message] = net::ipv4::icmp::unpack_icmp_message(
             net::ipv4::icmp::header::type_enumerator::echo_reply, data);
