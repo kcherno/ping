@@ -14,14 +14,13 @@
 
 void ping::detail::icmp_ping_executor::execute()
 {
-    std::string buffer;
-
-    net::ipv4::endpoint source_endpoint;
+    std::string         buffer;
+    net::ipv4::endpoint source;
 
     timer timer {
         [&](std::error_code& error)
         {
-            socket_.receive_from(error, source_endpoint, buffer);
+            socket_.receive_from(error, source, buffer);
         }
     };
 
@@ -44,7 +43,7 @@ void ping::detail::icmp_ping_executor::execute()
 
         if (not timer.is_expired())
         {
-            if (verify_response(source_endpoint, buffer))
+            if (verify_response(source, buffer))
             {
                 [[maybe_unused]] const auto response_time =
                     std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -74,9 +73,9 @@ void ping::detail::icmp_ping_executor::ping_once()
 }
 
 bool ping::detail::icmp_ping_executor::verify_response(
-    const net::ipv4::endpoint& source_endpoint, std::string_view data)
+    const net::ipv4::endpoint& source, std::string_view data)
 {
-    if (destination_.address() == source_endpoint.address())
+    if (destination_.address() == source.address())
     {
         const auto& [header, message] = net::ipv4::icmp::unpack_icmp_message(
             net::ipv4::icmp::header::type_enumerator::echo_reply, data);
@@ -89,7 +88,7 @@ bool ping::detail::icmp_ping_executor::verify_response(
                 "received {} bytes from {}: "
                 "identifier={} sequence_number={}\n",
                 data.size(),
-                source_endpoint.address(),
+                source.address(),
                 header.echo_message.identifier,
                 header.echo_message.sequence_number);
 
