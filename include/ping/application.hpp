@@ -23,6 +23,7 @@ namespace ping
 
         struct configuration final
         {
+            std::uint16_t        count;
             std::string_view     address;
             std::string_view     icmp_echo_message;
             std::uint16_t        icmp_echo_message_identifier;

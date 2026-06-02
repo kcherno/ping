@@ -19,6 +19,10 @@ namespace ping::detail
         icmp_ping_executor(
             const application::configuration& configuration,
             application::statistics&          statistics) :
+                count_ {
+                    configuration.count
+                },
+
                 destination_endpoint_ {
                     configuration_.address
                 },
@@ -55,6 +59,7 @@ namespace ping::detail
 
         bool verify_response(const net::ipv4::endpoint&, std::string_view);
 
+        std::uint16_t            count_;
         net::ipv4::endpoint      destination_endpoint_;
         net::ipv4::icmp::header  header_;
         std::string_view         message_;

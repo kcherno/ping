@@ -2,7 +2,6 @@
 #include <iostream>
 #include <chrono>
 #include <format>
-#include <limits>
 #include <string>
 #include <thread>
 
@@ -33,8 +32,7 @@ void ping::detail::icmp_ping_executor::execute()
         message_.size(),
         message_.size() + net::ipv4::icmp::header::echo_message_header_size);
 
-    while (header_.echo_message.sequence_number <
-               std::numeric_limits<std::uint16_t>::max())
+    for (; count_; --count_)
     {
         ping_once();
 
@@ -55,8 +53,6 @@ void ping::detail::icmp_ping_executor::execute()
         }
 
         std::this_thread::sleep_for(std::chrono::seconds {1});
-
-        ++header_.echo_message.sequence_number;
     }
 }
 
@@ -65,6 +61,8 @@ void ping::detail::icmp_ping_executor::ping_once()
     socket_.send_to(
         destination_endpoint_,
         net::ipv4::icmp::make_icmp_message(header_, message_));
+
+    ++header_.echo_message.sequence_number;
 
     ++statistics_.sent_packets;
 
