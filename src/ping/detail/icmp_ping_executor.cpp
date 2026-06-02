@@ -31,7 +31,7 @@ void ping::detail::icmp_ping_executor::execute()
         message_.size(),
         message_.size() + net::ipv4::icmp::header::echo_message_header_size);
 
-    for (; count_; --count_)
+    for (; count_; --count_, ++header_.echo_message.sequence_number)
     {
         ping_once();
 
@@ -59,8 +59,6 @@ void ping::detail::icmp_ping_executor::ping_once()
 {
     socket_.send_to(
         destination_, net::ipv4::icmp::make_icmp_message(header_, message_));
-
-    ++header_.echo_message.sequence_number;
 
     ++statistics_.sent_packets;
 
