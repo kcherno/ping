@@ -38,6 +38,10 @@ namespace ping::detail
                     }
                 },
 
+                interval_ {
+                    configuration.interval
+                },
+
                 message_ {
                     configuration.icmp_echo_message
                 },
@@ -62,6 +66,7 @@ namespace ping::detail
         std::uint16_t            count_;
         net::ipv4::endpoint      destination_;
         net::ipv4::icmp::header  header_;
+        std::chrono::seconds     interval_;
         std::string_view         message_;
         net::ipv4::icmp::socket  socket_;
         application::statistics& statistics_;
