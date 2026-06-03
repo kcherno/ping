@@ -43,7 +43,7 @@ namespace ping::detail
                 },
 
                 message_ {
-                    configuration.icmp_echo_message
+                    configuration.message
                 },
 
                 statistics_ {
