@@ -166,5 +166,80 @@ ping::application::application(int argc, char** argv) :
         .sent_packets     = 0
     }
 {
+    auto options = options::parser(options_).parse_command_line(argc, argv);
 
+    initialize_configuration(options);
+}
+
+void ping::application::initialize_configuration(
+    const options_type& options) noexcept
+{
+    const auto& [parsed_options, positional_options] = options;
+
+    if (parsed_options.contains("-c"))
+    {
+        configuration_.count = static_cast<decltype(configuration_.count)>(
+            std::stoi(std::string(parsed_options["-c"].front())));
+    }
+
+    else
+    {
+        configuration_.count =
+            std::numeric_limits<decltype(configuration_.count)>::max();
+    }
+
+    if (positional_options.empty())
+    {
+        configuration_.destination = {};
+    }
+
+    else
+    {
+        configuration_.destination = positional_options.front();
+    }
+
+    if (parsed_options.contains("--identifier"))
+    {
+        configuration_.identifier = static_cast<decltype(
+            configuration_.identifier)>(std::stoi(std::string(
+                parsed_options["--identifier"].front())));
+    }
+
+    else
+    {
+        configuration_.identifier = std::numeric_limits<decltype(
+            configuration_.identifier)>::min();
+    }
+
+    if (parsed_options.contains("-i"))
+    {
+        configuration_.interval = std::chrono::seconds(std::stoi(std::string(
+            parsed_options["-i"].front())));
+    }
+
+    else
+    {
+        configuration_.interval = std::chrono::seconds {1};
+    }
+
+    if (parsed_options.contains("-m"))
+    {
+        configuration_.message = parsed_options["-m"].front();
+    }
+
+    else
+    {
+        configuration_.message = {};
+    }
+
+    if (parsed_options.contains("-t"))
+    {
+        configuration_.timeout = std::chrono::seconds(std::stoi(std::string(
+            parsed_options["-t"].front())));
+    }
+
+    else
+    {
+        configuration_.timeout = std::chrono::seconds {1};
+    }
 }

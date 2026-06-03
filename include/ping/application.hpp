@@ -1,12 +1,14 @@
 #pragma once
 
 #include <string_view>
+#include <utility>
 #include <chrono>
 #include <memory>
 
 #include <cstdint>
 
 #include "options/grammar.hpp"
+#include "options/parser.hpp"
 
 namespace ping
 {
@@ -52,6 +54,12 @@ namespace ping
         }
 
     public:
+
+        using options_type = std::pair<
+            options::parser::parsed_options,
+            options::parser::positional_options>;
+
+        void initialize_configuration(const options_type&) noexcept;
 
         configuration                               configuration_;
         std::unique_ptr<basic_application_executor> executor_;
