@@ -61,6 +61,8 @@ namespace ping
 
         void initialize_configuration(const options_type&) noexcept;
 
+        void initialize_executor();
+
         configuration                               configuration_;
         std::unique_ptr<basic_application_executor> executor_;
         options::grammar                            options_;

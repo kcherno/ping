@@ -3,11 +3,14 @@
 #include <utility>
 #include <format>
 #include <limits>
+#include <memory>
 #include <string>
 
 #include <cstdint>
 
 #include "options/option.hpp"
+
+#include "ping/detail/icmp_ping_executor.hpp"
 
 #include "ping/application.hpp"
 
@@ -169,6 +172,8 @@ ping::application::application(int argc, char** argv) :
     auto options = options::parser(options_).parse_command_line(argc, argv);
 
     initialize_configuration(options);
+
+    initialize_executor();
 }
 
 void ping::application::initialize_configuration(
@@ -241,5 +246,19 @@ void ping::application::initialize_configuration(
     else
     {
         configuration_.timeout = std::chrono::seconds {1};
+    }
+}
+
+void ping::application::initialize_executor()
+{
+    if (configuration_.destination.empty())
+    {
+
+    }
+
+    else
+    {
+        executor_ = std::make_unique<detail::icmp_ping_executor>(
+            configuration_, statistics_);
     }
 }
