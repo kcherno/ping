@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+#include "options/grammar.hpp"
+
 namespace ping
 {
     class application final
@@ -37,10 +39,7 @@ namespace ping
             std::uint16_t sent_packets;
         };
 
-        application(int argc, char** argv)
-        {
-
-        }
+        application(int, char**);
 
         static consteval std::string_view name() noexcept
         {
@@ -55,7 +54,8 @@ namespace ping
     public:
 
         configuration                               configuration_;
-        statistics                                  statistics_;
         std::unique_ptr<basic_application_executor> executor_;
+        options::grammar                            options_;
+        statistics                                  statistics_;
     };
 }
