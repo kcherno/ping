@@ -3,6 +3,7 @@
 #include "ping/generic/executor.hpp"
 
 #include "ping/configuration.hpp"
+#include "ping/statistics.hpp"
 
 namespace ping::detail
 {
@@ -11,8 +12,8 @@ namespace ping::detail
     public:
 
         constexpr icmp_executor(
-            const configuration&      configuration,
-            application::statistics& statistics
+            const configuration& configuration,
+            statistics&          statistics
         ) noexcept :
             configuration_ {configuration},
             statistics_    {statistics}
@@ -22,7 +23,7 @@ namespace ping::detail
 
     private:
 
-        const configuration&     configuration_;
-        application::statistics& statistics_;
+        const configuration& configuration_;
+        statistics&          statistics_;
     };
 }

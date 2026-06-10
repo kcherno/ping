@@ -10,6 +10,8 @@
 #include "ping/detail/icmp_executor.hpp"
 #include "ping/detail/timer.hpp"
 
+#include "ping/statistics.hpp"
+
 namespace
 {
     struct execution_context final
@@ -66,9 +68,9 @@ namespace
     }
 
     void check_echo_reply(
-        const ping::configuration&     configuration,
-        execution_context&             execution_context,
-        ping::application::statistics& statistics)
+        const ping::configuration& configuration,
+        execution_context&         execution_context,
+        ping::statistics&          statistics)
     {
         if (execution_context.timer.is_expired())
         {
@@ -104,9 +106,9 @@ namespace
     }
 
     void send_echo_request(
-        const ping::configuration&     configuration,
-        execution_context&             execution_context,
-        ping::application::statistics& statistics)
+        const ping::configuration& configuration,
+        execution_context&         execution_context,
+        ping::statistics&          statistics)
     {
         const auto icmp_echo_message = net::ipv4::icmp::make_icmp_message(
             execution_context.header, configuration.message

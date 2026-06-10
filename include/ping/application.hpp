@@ -4,26 +4,19 @@
 #include <utility>
 #include <memory>
 
-#include <cstdint>
-
 #include "options/grammar.hpp"
 #include "options/parser.hpp"
 
 #include "ping/generic/executor.hpp"
 
 #include "ping/configuration.hpp"
+#include "ping/statistics.hpp"
 
 namespace ping
 {
     class application final
     {
     public:
-
-        struct statistics final
-        {
-            std::uint16_t received_packets;
-            std::uint16_t sent_packets;
-        };
 
         application(int, char**);
 
