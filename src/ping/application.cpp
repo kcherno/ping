@@ -11,6 +11,7 @@
 #include "options/option.hpp"
 #include "options/parser.hpp"
 
+#include "ping/detail/application_options_printer.hpp"
 #include "ping/detail/help_message_printer.hpp"
 #include "ping/detail/configuration.hpp"
 
@@ -221,7 +222,14 @@ void ping::application::initialize_executor(
 
     if (positional_options.empty())
     {
-        if (not parsed_options.contains("--help"))
+        if (parsed_options.contains("--help"))
+        {
+            executor_ = std::make_unique<detail::application_options_printer>(
+                options_
+            );
+        }
+
+        else
         {
             executor_ = std::make_unique<detail::help_message_printer>(
                 options_
