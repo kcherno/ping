@@ -59,6 +59,12 @@ ping::application::application(int argc, char** argv) :
         },
 
         options::option {
+            .short_name  = "-h",
+            .long_name   = "--help",
+            .description = "display a help message"
+        },
+
+        options::option {
             .short_name        = "-i",
             .long_name         = "--interval",
             .description       = "interval between pings in seconds",
