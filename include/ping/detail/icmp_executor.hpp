@@ -1,11 +1,12 @@
 #pragma once
 
+#include "ping/generic/executor.hpp"
+
 #include "ping/configuration.hpp"
-#include "ping/application.hpp"
 
 namespace ping::detail
 {
-    class icmp_executor final : public application::basic_application_executor
+    class icmp_executor final : public generic::executor
     {
     public:
 

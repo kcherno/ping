@@ -7,6 +7,8 @@
 
 #include "options/grammar.hpp"
 
+#include "ping/generic/executor.hpp"
+
 #include "ping/configuration.hpp"
 
 namespace ping
@@ -14,15 +16,6 @@ namespace ping
     class application final
     {
     public:
-
-        class basic_application_executor
-        {
-        public:
-
-            virtual ~basic_application_executor() = default;
-
-            virtual void execute() = 0;
-        };
 
         struct statistics final
         {
@@ -44,9 +37,9 @@ namespace ping
 
     public:
 
-        configuration                               configuration_;
-        std::unique_ptr<basic_application_executor> executor_;
-        options::grammar                            options_;
-        statistics                                  statistics_;
+        configuration                      configuration_;
+        std::unique_ptr<generic::executor> executor_;
+        options::grammar                   options_;
+        statistics                         statistics_;
     };
 }
