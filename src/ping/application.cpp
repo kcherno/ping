@@ -11,6 +11,7 @@
 #include "options/option.hpp"
 #include "options/parser.hpp"
 
+#include "ping/detail/help_message_printer.hpp"
 #include "ping/detail/configuration.hpp"
 
 #include "ping/application.hpp"
@@ -170,8 +171,11 @@ ping::application::application(int argc, char** argv) :
         .sent_packets     = 0
     }
 {
-    const auto& [parsed_options, positional_options] =
-        options::parser(options_).parse_command_line(argc, argv);
+    const auto options = options::parser(options_).parse_command_line(
+        argc, argv
+    );
+
+    const auto& [parsed_options, positional_options] = options;
 
     configuration_.address = positional_options.empty() ?
         configuration::default_address :
@@ -204,4 +208,24 @@ ping::application::application(int argc, char** argv) :
         "-t",
         configuration::default_timeout
     );
+
+    initialize_executor(options);
+}
+
+void ping::application::initialize_executor(
+    const std::pair<
+        options::parser::parsed_options,
+        options::parser::positional_options>& options)
+{
+    const auto& [parsed_options, positional_options] = options;
+
+    if (positional_options.empty())
+    {
+        if (not parsed_options.contains("--help"))
+        {
+            executor_ = std::make_unique<detail::help_message_printer>(
+                options_
+            );
+        }
+    }
 }
