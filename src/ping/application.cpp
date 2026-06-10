@@ -9,8 +9,9 @@
 #include <cstdint>
 
 #include "options/option.hpp"
+#include "options/parser.hpp"
 
-#include "ping/detail/icmp_ping_executor.hpp"
+#include "ping/detail/configuration.hpp"
 
 #include "ping/application.hpp"
 
@@ -169,96 +170,38 @@ ping::application::application(int argc, char** argv) :
         .sent_packets     = 0
     }
 {
-    auto options = options::parser(options_).parse_command_line(argc, argv);
+    const auto& [parsed_options, positional_options] =
+        options::parser(options_).parse_command_line(argc, argv);
 
-    initialize_configuration(options);
+    configuration_.address = positional_options.empty() ?
+        configuration::default_address :
+        positional_options.front();
 
-    initialize_executor();
-}
+    configuration_.count = detail::get_number_or_default(
+        parsed_options,
+        "-c",
+        configuration::default_count
+    );
 
-void ping::application::initialize_configuration(
-    const options_type& options) noexcept
-{
-    const auto& [parsed_options, positional_options] = options;
+    configuration_.identifier = detail::get_number_or_default(
+        parsed_options,
+        "--identifier",
+        configuration::default_identifier
+    );
 
-    if (parsed_options.contains("-c"))
-    {
-        configuration_.count = static_cast<decltype(configuration_.count)>(
-            std::stoi(std::string(parsed_options["-c"].front())));
-    }
+    configuration_.interval = detail::get_duration_or_default(
+        parsed_options,
+        "-i",
+        configuration::default_interval
+    );
 
-    else
-    {
-        configuration_.count =
-            std::numeric_limits<decltype(configuration_.count)>::max();
-    }
+    configuration_.message = parsed_options.contains("-m") ?
+        parsed_options["-m"].front() :
+        configuration::default_message;
 
-    if (positional_options.empty())
-    {
-        configuration_.destination = {};
-    }
-
-    else
-    {
-        configuration_.destination = positional_options.front();
-    }
-
-    if (parsed_options.contains("--identifier"))
-    {
-        configuration_.identifier = static_cast<decltype(
-            configuration_.identifier)>(std::stoi(std::string(
-                parsed_options["--identifier"].front())));
-    }
-
-    else
-    {
-        configuration_.identifier = std::numeric_limits<decltype(
-            configuration_.identifier)>::min();
-    }
-
-    if (parsed_options.contains("-i"))
-    {
-        configuration_.interval = std::chrono::seconds(std::stoi(std::string(
-            parsed_options["-i"].front())));
-    }
-
-    else
-    {
-        configuration_.interval = std::chrono::seconds {1};
-    }
-
-    if (parsed_options.contains("-m"))
-    {
-        configuration_.message = parsed_options["-m"].front();
-    }
-
-    else
-    {
-        configuration_.message = {};
-    }
-
-    if (parsed_options.contains("-t"))
-    {
-        configuration_.timeout = std::chrono::seconds(std::stoi(std::string(
-            parsed_options["-t"].front())));
-    }
-
-    else
-    {
-        configuration_.timeout = std::chrono::seconds {1};
-    }
-}
-
-void ping::application::initialize_executor()
-{
-    if (configuration_.destination.empty())
-    {
-
-    }
-
-    else
-    {
-        executor_ = std::make_unique<detail::icmp_ping_executor>(
-            configuration_, statistics_);
-    }
+    configuration_.timeout = detail::get_duration_or_default(
+        parsed_options,
+        "-t",
+        configuration::default_timeout
+    );
 }

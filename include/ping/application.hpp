@@ -1,13 +1,11 @@
 #pragma once
 
 #include <string_view>
-#include <utility>
 #include <memory>
 
 #include <cstdint>
 
 #include "options/grammar.hpp"
-#include "options/parser.hpp"
 
 #include "ping/configuration.hpp"
 
@@ -45,8 +43,6 @@ namespace ping
         }
 
     public:
-
-        void initialize_executor();
 
         configuration                               configuration_;
         std::unique_ptr<basic_application_executor> executor_;
