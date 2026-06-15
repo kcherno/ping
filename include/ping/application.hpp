@@ -32,11 +32,9 @@ namespace ping
 
     public:
 
-        void initialize_executor(
-            const std::pair<
-                options::parser::parsed_options,
-                options::parser::positional_options>&
-        );
+        void initialize_executor(const std::pair<
+            options::parser::parsed_options,
+            options::parser::positional_options>&);
 
         configuration                      configuration_;
         std::unique_ptr<generic::executor> executor_;

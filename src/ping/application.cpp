@@ -14,6 +14,7 @@
 #include "ping/detail/application_options_printer.hpp"
 #include "ping/detail/help_message_printer.hpp"
 #include "ping/detail/configuration.hpp"
+#include "ping/detail/icmp_executor.hpp"
 
 #include "ping/application.hpp"
 
@@ -179,50 +180,34 @@ ping::application::application(int argc, char** argv) :
     }
 {
     const auto options = options::parser(options_).parse_command_line(
-        argc, argv
-    );
+        argc, argv);
 
     const auto& [parsed_options, positional_options] = options;
 
     configuration_.address = positional_options.empty() ?
-        configuration::default_address :
-        positional_options.front();
+        configuration::default_address : positional_options.front();
 
     configuration_.count = detail::get_number_or_default(
-        parsed_options,
-        "-c",
-        configuration::default_count
-    );
+        parsed_options, "-c", configuration::default_count);
 
     configuration_.identifier = detail::get_number_or_default(
-        parsed_options,
-        "--identifier",
-        configuration::default_identifier
-    );
+        parsed_options, "--identifier", configuration::default_identifier);
 
     configuration_.interval = detail::get_duration_or_default(
-        parsed_options,
-        "-i",
-        configuration::default_interval
-    );
+        parsed_options, "-i", configuration::default_interval);
 
     configuration_.message = parsed_options.contains("-m") ?
-        parsed_options["-m"].front() :
-        configuration::default_message;
+        parsed_options["-m"].front() : configuration::default_message;
 
     configuration_.timeout = detail::get_duration_or_default(
-        parsed_options,
-        "-t",
-        configuration::default_timeout
-    );
+        parsed_options, "-t", configuration::default_timeout);
 
     initialize_executor(options);
 }
 
-void ping::application::initialize_executor(
-    const std::pair<
-        options::parser::parsed_options,
-        options::parser::positional_options>& options)
+void ping::application::initialize_executor(const std::pair<
+    options::parser::parsed_options, options::parser::positional_options>&
+        options)
 {
     const auto& [parsed_options, positional_options] = options;
 
@@ -231,15 +216,19 @@ void ping::application::initialize_executor(
         if (parsed_options.contains("--help"))
         {
             executor_ = std::make_unique<detail::application_options_printer>(
-                options_
-            );
+                options_);
         }
 
         else
         {
             executor_ = std::make_unique<detail::help_message_printer>(
-                options_
-            );
+                options_);
         }
+    }
+
+    else
+    {
+        executor_ = std::make_unique<detail::icmp_executor>(
+            configuration_, statistics_);
     }
 }
