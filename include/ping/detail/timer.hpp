@@ -8,7 +8,7 @@
 
 #include <csignal>
 
-namespace ping
+namespace ping::detail
 {
     class timer final
     {
