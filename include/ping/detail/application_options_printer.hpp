@@ -13,14 +13,15 @@ namespace ping::detail
     public:
 
         constexpr application_options_printer(
-            const options::grammar& options
-        ) noexcept :
-            options_ {options}
+            const options::grammar& options) noexcept :
+                options_ {options}
         {}
 
         void execute() override
         {
-            std::cout << options_ << std::endl;
+            std::cout << "usage: ping [<options>] <address>\n\n"
+                      << options_
+                      << std::endl;
         }
 
     private:

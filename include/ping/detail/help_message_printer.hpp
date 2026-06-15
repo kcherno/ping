@@ -16,17 +16,14 @@ namespace ping::detail
     public:
 
         constexpr help_message_printer(
-            const options::grammar& options
-        ) noexcept :
-            options_ {options}
+            const options::grammar& options) noexcept :
+                options_ {options}
         {}
 
         void execute() override
         {
-            std::cout << std::format(
-                "Usage: {} [<options>] <address>\n",
-                application::name()
-            );
+            std::cout << std::format("usage: {} [<options>] <address>\n",
+                application::name());
         }
 
     private:

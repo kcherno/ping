@@ -203,6 +203,8 @@ ping::application::application(int argc, char** argv) :
         parsed_options, "-t", configuration::default_timeout);
 
     initialize_executor(options);
+
+    options_.description("common ping options:");
 }
 
 void ping::application::initialize_executor(const std::pair<

@@ -14,8 +14,7 @@ int main(int argc, char** argv)
     catch (const std::exception& exception)
     {
         std::cerr << std::format(
-            "{}: {}", ping::application::name(), exception.what())
-                  << std::endl;
+            "{}: {}\n", ping::application::name(), exception.what());
 
         return 1;
     }
